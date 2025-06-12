@@ -1,0 +1,42 @@
+name: Notificar estado del despliegue # Un nombre legible para tu workflow en GitHub Actions
+
+on:
+  push:
+    branches:
+      - main # Dispara el workflow en cada 'push' a la rama 'main'
+  pull_request:
+    branches:
+      - main # Dispara el workflow en cada 'pull request' a la rama 'main'
+  workflow_dispatch: # Permite ejecutar este workflow manualmente desde la interfaz de GitHub Actions
+
+jobs:
+  # Define un "trabajo" (job) llamado 'notificar'
+  notificar:
+    runs-on: ubuntu-latest # Especifica el sistema operativo donde se ejecutará el job
+
+    steps:
+      # Paso 1: Checkout del repositorio
+      # Este paso es crucial. Descarga tu código del repositorio al entorno de GitHub Actions
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4 # Usa la acción oficial de checkout de GitHub
+
+      # Paso 2: Dar permisos de ejecución al script
+      # Los scripts de Bash (.sh) a menudo necesitan permisos de ejecución
+      - name: Dar permisos de ejecución a notify.sh
+        run: chmod +x ./notify.sh # Ajusta la ruta si tu script está en una subcarpeta (ej: ./scripts/notify.sh)
+
+      # Paso 3: Ejecutar el script de notificación
+      # Este paso ejecuta tu script notify.sh
+      - name: Ejecutar script de notificación ntfy.sh
+        run: ./notify.sh
+        env:
+          # Puedes pasar variables de entorno a tu script aquí.
+          # Por ejemplo, la URL de ntfy.sh si tu script la necesita.
+          # Lo ideal es que NTFY_TOPIC o NTFY_URL estén en Secrets para seguridad.
+          # Ejemplo:
+          NTFY_TOPIC: "mi_super_proyecto" # Reemplaza con tu tópico real de ntfy.sh
+          # NTFY_URL: ${{ secrets.NTFY_SH_BASE_URL }} # Si usas una URL base desde Secrets
+          GITHUB_REPO: ${{ github.repository }} # Accede a variables de contexto de GitHub
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
